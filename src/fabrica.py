@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt  # grafico
 import tqdm
 import numpy as np
 
-RUT = 577;
+RRR = 577;
 
 class Corte:
     def __init__(self, dh):
