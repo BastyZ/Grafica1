@@ -3,6 +3,3 @@
 Esto inicia y ejecu
 @version 1.1
 """
-
-
-"""" hola  como estas """
