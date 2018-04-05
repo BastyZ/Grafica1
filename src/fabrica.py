@@ -29,3 +29,8 @@ class Corte:
         self.dh = dh
         self._h = int(float(self.ancho) / self.dh)
         self._w = int(float(self.alto) / self.dh)
+
+
+        # Calculo donde está la linea de la montaña,
+        # luego desde allí hacia abajo declarar los valores fijos de la montaña
+        # y sus contornos
