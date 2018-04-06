@@ -12,6 +12,11 @@ import numpy as np
 
 RRR = 577
 
+
+def rho(x, y):
+    return 1 / (x ** 2 + y ** 2 + 120) ** .5
+
+
 class Corte:
     def __init__(self, dh):
         """"
@@ -30,8 +35,26 @@ class Corte:
         self._h = int(float(self.ancho) / self.dh)
         self._w = int(float(self.alto) / self.dh)
 
-# Estudiar linea Bresenham
-    def bresenham_line(matrix, x1, y1, x2, y2):
+        self._matrix = np.zeros((self._h, self._w))
+        self._mountain = []
+        self._factory = []
+        self._ocean = []
+
+    def reset(self):
+        self.__init__(self.dh)
+
+        # Calculo donde está la linea de la montaña,
+        # luego desde allí hacia abajo declarar los valores fijos de la montaña
+        # y sus contornos. La idea es:
+        #   0. Crear la skybox (bordes de cielo)
+        #   1. Crear la linea de mar, fabrica y playa
+        #   2. Crear las lineas de montaña
+        #   3. Rellenar las montañas
+        #   4. Restarle al skybox la montaña
+        #   5. Asignar las temperaturas inicales
+
+    # Estudiar linea Bresenham
+    def bresenham_line(self, matrix, x1, y1, x2, y2):
         """"
         Tiralinea de Bresenham
           La idea es que lance las lineas para cualquier matriz, por lo que
@@ -63,7 +86,7 @@ class Corte:
             dy = k
 
         # inicialización de valores
-        av_r = 2*dy
+        av_r = 2 * dy
         av = av_r - dx
         av_i = av - dx
 
@@ -80,8 +103,3 @@ class Corte:
                 x += inc_xr
                 y += inc_yr
                 av += av_r
-
-        # Calculo donde está la linea de la montaña,
-        # luego desde allí hacia abajo declarar los valores fijos de la montaña
-        # y sus contornos
-
