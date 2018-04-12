@@ -6,6 +6,8 @@ Esto inicia y ejecuta la Tarea
 """
 
 # Importar librerías
+from builtins import set
+
 import matplotlib.pyplot as plt  # grafico
 import tqdm
 import numpy as np
@@ -36,9 +38,12 @@ class Corte:
         self._w = int(float(self.alto) / self.dh)
 
         self._matrix = np.zeros((self._h, self._w))
-        self._mountain = []
-        self._factory = []
-        self._ocean = []
+        self._elements = np.zeros((self._h, self._w))
+        # En elements se agregaran los elementos del terreno según:
+        sky = 0
+        mountains = 1
+        snowy_mountains = 2
+        factory = 3
 
     def reset(self):
         self.__init__(self.dh)
