@@ -6,17 +6,74 @@ Esto inicia y ejecuta la Tarea
 """
 
 # Importar librerías
-from builtins import set
-
 import matplotlib.pyplot as plt  # grafico
 import tqdm
 import numpy as np
 
-RRR = 577
+# Variable dada según enunciado
+RRR = .577
+
+SEA = 0
+SKY = 1
+MOUNTAIN = 2
+SNOWY_MOUNTAIN = 3
+FACTORY = 4
 
 
 def rho(x, y):
     return 1 / (x ** 2 + y ** 2 + 120) ** .5
+
+
+# Estudiar linea Bresenham
+def bresenham_line(matrix, x1, y1, x2, y2, value=0):
+    """"
+    Tiralinea de Bresenham
+      La idea es que lance las lineas para cualquier matriz, por lo que
+      debe darsele los valores incluyendo el dh correspondiente, mejor
+      dicho, las distancias escaladas. Creado a partir del pseudocodigo
+      de Wikipedia
+    """
+    dy = y2 - y1
+    dx = x2 - x1
+    x = x1
+    y = y1
+
+    # incremento para avance inclinado
+    inc_yi = dy / abs(dy)
+    dy = abs(dy)
+    inc_xi = dx / abs(dx)
+    dx = abs(dx)
+
+    # incremento para avance recto
+    if dx >= dy:
+        inc_yr = 0
+        inc_xr = inc_xi
+    else:
+        inc_yr = inc_yi
+        inc_xr = 0
+        # dy > dx por lo que se intercambian
+        k = dx
+        dx = dy
+        dy = k
+
+    # inicialización de valores
+    av_r = 2 * dy
+    av = av_r - dx
+    av_i = av - dx
+
+    # trazado de linea
+    while x != x2:
+        matrix[x][y] = value
+        if av >= 0:
+            # avance inclinado
+            x += inc_xi
+            y += inc_yi
+            av += av_i
+        else:
+            # avance recto
+            x += inc_xr
+            y += inc_yr
+            av += av_r
 
 
 class Corte:
@@ -27,10 +84,19 @@ class Corte:
         """
 
         # Distancias fijas (metros)
-        self.ancho = 4000
-        self.alto = 2000
-        self.ancho_playa = 400
-        self.ancho_fabrica = 120
+        self.ancho = 4000 / self.dh
+        self.mar = (1200 + 400*RRR) / self.dh
+        self.inicio_playa = (400 - 120) / self.dh + self.mar
+        self.ancho_fabrica = 120 / self.dh
+        self.inicio_cerro_1 = 1200 / self.dh + self.mar
+        self.inicio_depresion = 1500 / self.dh + self.mar
+        self.inicio_cerro_2 = 2000 / self.dh + self.mar
+
+        self.alto = 2000 / self.dh
+        self.alto_playa = (400/3) / self.dh
+        self.alto_cerro_1 = 1500 + 200 * RRR
+        self.alto_depresion = 1300 + 200 * RRR
+        self.alto_cerro_2 = 1850 + 100 * RRR
 
         # Distancias relativas por grilla
         self.dh = dh
@@ -40,10 +106,12 @@ class Corte:
         self._matrix = np.zeros((self._h, self._w))
         self._elements = np.zeros((self._h, self._w))
         # En elements se agregaran los elementos del terreno según:
-        sky = 0
-        mountains = 1
-        snowy_mountains = 2
-        factory = 3
+
+    def generate_elements(self):
+        # dfsd
+        return
+
+
 
     def reset(self):
         self.__init__(self.dh)
@@ -58,53 +126,3 @@ class Corte:
         #   4. Restarle al skybox la montaña
         #   5. Asignar las temperaturas inicales
 
-    # Estudiar linea Bresenham
-    def bresenham_line(self, matrix, x1, y1, x2, y2):
-        """"
-        Tiralinea de Bresenham
-          La idea es que lance las lineas para cualquier matriz, por lo que
-          debe darsele los valores incluyendo el dh correspondiente, mejor
-          dicho, las distancias escaladas. Creado a partir del pseudocodigo
-          de Wikipedia
-        """
-        dy = y2 - y1
-        dx = x2 - x1
-        x = x1
-        y = y1
-
-        # incremento para avance inclinado
-        inc_yi = dy / abs(dy)
-        dy = abs(dy)
-        inc_xi = dx / abs(dx)
-        dx = abs(dx)
-
-        # incremento para avance recto
-        if dx >= dy:
-            inc_yr = 0
-            inc_xr = inc_xi
-        else:
-            inc_yr = inc_yi
-            inc_xr = 0
-            # dy > dx por lo que se intercambian
-            k = dx
-            dx = dy
-            dy = k
-
-        # inicialización de valores
-        av_r = 2 * dy
-        av = av_r - dx
-        av_i = av - dx
-
-        # trazado de linea
-        while x != x2:
-            matrix[x][y] = 1
-            if av >= 0:
-                # avance inclinado
-                x += inc_xi
-                y += inc_yi
-                av += av_i
-            else:
-                # avance recto
-                x += inc_xr
-                y += inc_yr
-                av += av_r
