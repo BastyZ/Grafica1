@@ -111,9 +111,9 @@ class Corte:
         self._w = int(float(self.ancho) / self.dh)
 
         # Distancias de elementos (metros)
-        self.ancho = int(float( 4000 / self.dh ))
+        self.ancho = int(float(4000 / self.dh))
         self.mar = int(float((1200 + 400*RRR) / self.dh))
-        self.fin_playa = int(float(400 / self.dh + self.mar ))
+        self.fin_playa = int(float(400 / self.dh + self.mar))
         self.ancho_fabrica = int(float(120 / self.dh))
         self.centro_cerro_1 = int(float(1200 / self.dh + self.mar))
         self.centro_depresion = int(float(1500 / self.dh + self.mar))
@@ -151,9 +151,8 @@ class Corte:
                        self.alto_cerro_2, self.centro_cerro_2, MOUNTAIN)
         # con la última linea se decide dejarla a 1600 mts sobre el nivel del mar
         bresenham_line(self._elements, self.alto_cerro_2, self.centro_cerro_2,
-                       self._h - 1500)
+                       self._h - 1500, self._w - 1, MOUNTAIN)
         fill_elements(self._elements, self._h, self._w, self.dh)
-
 
     def reset(self):
         self.__init__(self.dh)
@@ -161,10 +160,4 @@ class Corte:
         # Calculo donde está la linea de la montaña,
         # luego desde allí hacia abajo declarar los valores fijos de la montaña
         # y sus contornos. La idea es:
-        #   0. Crear la skybox (bordes de cielo)
-        #   1. Crear la linea de mar, fabrica y playa
-        #   2. Crear las lineas de montaña
-        #   3. Rellenar las montañas
-        #   4. Restarle al skybox la montaña
         #   5. Asignar las temperaturas inicales
-
