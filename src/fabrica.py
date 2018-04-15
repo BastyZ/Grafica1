@@ -13,8 +13,8 @@ import numpy as np
 # Variable dada según enunciado
 RRR = .577
 
-SEA = 0
-SKY = 1
+SKY = 0
+SEA = 1
 MOUNTAIN = 2
 SNOWY_MOUNTAIN = 3
 FACTORY = 4
@@ -76,6 +76,29 @@ def bresenham_line(matrix, x1, y1, x2, y2, value=0):
             av += av_r
 
 
+def fill_elements(matrix, alto, ancho, dh):
+    for x in range(ancho):
+        is_mountains = False
+        for y in range(alto):
+            cell = matrix[y][x]
+            if not is_mountains:
+                if cell == SKY:
+                    break
+                if cell == SEA:
+                    break
+                if cell == FACTORY:
+                    break
+                if cell == MOUNTAIN:
+                    is_mountains = True
+                    if y < alto - int(float(1800 / dh)):
+                        matrix[y][x] = SNOWY_MOUNTAIN
+            else:
+                if y < alto - int(float(1800 / dh)):
+                    matrix[y][x] = SNOWY_MOUNTAIN
+                else:
+                    matrix[y][x] = MOUNTAIN
+
+
 class Corte:
     def __init__(self, dh):
         """"
@@ -129,6 +152,7 @@ class Corte:
         # con la última linea se decide dejarla a 1600 mts sobre el nivel del mar
         bresenham_line(self._elements, self.alto_cerro_2, self.centro_cerro_2,
                        self._h - 1500)
+        fill_elements(self._elements, self._h, self._w, self.dh)
 
 
     def reset(self):
