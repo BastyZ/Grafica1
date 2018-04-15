@@ -82,41 +82,53 @@ class Corte:
         Constructor
         :param dh: Tamaño de la Grilla
         """
-
-        # Distancias fijas (metros)
-        self.ancho = 4000 / self.dh
-        self.mar = (1200 + 400*RRR) / self.dh
-        self.fin_playa = (400) / self.dh + self.mar
-        self.ancho_fabrica = 120 / self.dh
-        self.centro_cerro_1 = 1200 / self.dh + self.mar
-        self.centro_depresion = 1500 / self.dh + self.mar
-        self.centro_cerro_2 = 2000 / self.dh + self.mar
-
-        self.alto = 2000 / self.dh
-        self.alto_playa = (400/3) / self.dh
-        self.alto_cerro_1 = 1500 + 200 * RRR
-        self.alto_depresion = 1300 + 200 * RRR
-        self.alto_cerro_2 = 1850 + 100 * RRR
-
         # Distancias relativas por grilla
         self.dh = dh
         self._h = int(float(self.alto) / self.dh)
         self._w = int(float(self.ancho) / self.dh)
+
+        # Distancias de elementos (metros)
+        self.ancho = int(float( 4000 / self.dh ))
+        self.mar = int(float((1200 + 400*RRR) / self.dh))
+        self.fin_playa = int(float(400 / self.dh + self.mar ))
+        self.ancho_fabrica = int(float(120 / self.dh))
+        self.centro_cerro_1 = int(float(1200 / self.dh + self.mar))
+        self.centro_depresion = int(float(1500 / self.dh + self.mar))
+        self.centro_cerro_2 = int(float(2000 / self.dh + self.mar))
+
+        self.alto = int(float(2000 / self.dh))
+        self.alto_playa = int(float(self._h - ((400/3) / self.dh)))
+        self.alto_cerro_1 = int(float(self._h - ((1500 + 200 * RRR) / self.dh)))
+        self.alto_depresion = int(float(self._h - (1300 + 200 * RRR) / self.dh))
+        self.alto_cerro_2 = int(float(self._h - ((1850 + 100 * RRR) / self.dh)))
 
         self._matrix = np.zeros((self._h, self._w))
         self._elements = np.zeros((self._h, self._w))
         # En elements se agregaran los elementos del terreno según:
 
     def generate_elements(self):
+        """
+        Esta funcion considera que en numpy las matrices son zeros[y,x] y __no__ que el 0,0
+        se encuentra en la esquina superior izquierda.
+        """
         # Linea del mar
         bresenham_line(self._elements, self._h-1, 0, self._h-1, self.mar, SEA)
         # Linea de fabrica
-        bresenham_line(self._elements, self._h-1, self.mar+1, self._h-1, self.mar + self.ancho_fabrica, FACTORY)
+        bresenham_line(self._elements, self._h-1, self.mar+1,
+                       self._h-1, self.mar + self.ancho_fabrica, FACTORY)
         # Linea de playa
-        bresenham_line(self._elements, self._h-1, self.mar+self.ancho_fabrica+1, self._h-1, self.fin_playa, MOUNTAIN)
-        # Lineas de cerro
-
-
+        bresenham_line(self._elements, self._h-1, self.mar+self.ancho_fabrica+1,
+                       self.alto_playa, self.fin_playa, MOUNTAIN)
+        # Lineas de cerro  despresion intermedia
+        bresenham_line(self._elements, self.alto_playa, self.fin_playa+1,
+                       self.centro_cerro_1, self.alto_cerro_1, MOUNTAIN)
+        bresenham_line(self._elements, self.alto_cerro_1, self.centro_cerro_1+1,
+                       self.alto_depresion, self.centro_depresion, MOUNTAIN)
+        bresenham_line(self._elements, self.alto_depresion, self.centro_depresion+1,
+                       self.alto_cerro_2, self.centro_cerro_2, MOUNTAIN)
+        # con la última linea se decide dejarla a 1600 mts sobre el nivel del mar
+        bresenham_line(self._elements, self.alto_cerro_2, self.centro_cerro_2,
+                       self._h - 1500)
 
 
     def reset(self):
