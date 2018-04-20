@@ -18,6 +18,8 @@ SEA = 1
 MOUNTAIN = 2
 SNOWY_MOUNTAIN = 3
 FACTORY = 4
+TEMP_MOUNTAIN = 20
+TEMP_SNOW = 0
 
 
 def rho(x, y):
@@ -77,6 +79,15 @@ def bresenham_line(matrix, x1, y1, x2, y2, value=0):
 
 
 def fill_elements(matrix, alto, ancho, dh):
+    """
+    Rellena las montañas, solo con fines visuales excepto por
+    la creación de montañas nevadas, que sevirá para establecer temperaturas
+
+    :param matrix: matriz en la que dibuja
+    :param alto: alto de la matriz
+    :param ancho: ancho de la matriz
+    :param dh: delta, para calcular distancias
+    """
     for x in range(ancho):
         is_mountains = False
         for y in range(alto):
@@ -97,6 +108,26 @@ def fill_elements(matrix, alto, ancho, dh):
                     matrix[y][x] = SNOWY_MOUNTAIN
                 else:
                     matrix[y][x] = MOUNTAIN
+
+
+def cb_mar(t):
+    t = t % 24
+    if 0 <= t < 8:
+        return 4
+    elif 8 <= t < 16:
+        return 4 + 2 * (t - 8)
+    elif 16 <= t < 24:
+        return 20 - 2 * (24 - t)
+
+
+def cb_sky(t, y, dh):
+    y_metros = y * dh
+    return cb_mar(t) - (6 / 1000) * y_metros
+
+
+def temp_factory(t):
+    t = t % 24
+    return 450 * (2 + np.cos((np.pi * t) / 12))
 
 
 class Corte:
@@ -128,6 +159,13 @@ class Corte:
         self._matrix = np.zeros((self._h, self._w))
         self._elements = np.zeros((self._h, self._w))
         # En elements se agregaran los elementos del terreno según:
+        self.generate_elements()
+        fill_elements(self._elements, self.alto, self.ancho, self.dh)
+
+    def init_temps(self):
+        for x in range(self.ancho):
+            for y in range(self.alto):
+                asas
 
     def generate_elements(self):
         """
