@@ -175,7 +175,6 @@ class Corte:
         self._elements = np.zeros((self._h, self._w))
         # Se genera terreno y pobla con temperaturas correspondientes para cada cb:
         self.generate_elements()
-        fill_elements(self._elements, self.alto, self.ancho, self.dh)
         self.init_temps()
 
     def init_temps(self):
@@ -229,8 +228,8 @@ class Corte:
         epsilon = 0.001
         error = 0
         for _ in tqdm.tqdm(range(1000)):
-            for x in range(1, self._w):
-                for y in range(1, self._h):  # Evitando los bordes de la matriz
+            for x in range(1, self._w-1):
+                for y in range(1, self._h-1):  # Evitando los bordes de la matriz
                     # Casos borde donde no calcula
                     if self._elements[y][x] == SEA or self._elements[y][x] == FACTORY:
                         continue
@@ -265,6 +264,8 @@ def main():
     print("")
     tiempo = input("Hora del día a simular:")
     corte = Corte(grilla, 0, 0)
+    corte.imprime()
+    corte.start(set_omega(2000,4000), 0)
     corte.imprime()
 
 
