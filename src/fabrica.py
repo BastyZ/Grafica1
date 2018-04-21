@@ -9,6 +9,7 @@ Esto inicia y ejecuta la Tarea
 import matplotlib.pyplot as plt  # grafico
 import tqdm
 import numpy as np
+import math
 
 # Variable dada según enunciado
 RRR = .577
@@ -130,12 +131,19 @@ def temp_factory(t):
     return 450 * (2 + np.cos((np.pi * t) / 12))
 
 
+def set_omega(n, m):
+    return 4 / (2 + (math.sqrt(4 - (math.cos(math.pi / (n - 1)) + math.cos(math.pi / (m - 1))) ** 2)))
+
+
 class Corte:
-    def __init__(self, dh):
+    def __init__(self, dh, t, f):
         """"
         Constructor
         :param dh: Tamaño de la Grilla
         """
+        self.time = t
+        self.function = f
+
         # Distancias relativas por grilla
         self.dh = dh
         self._h = int(float(self.alto) / self.dh)
@@ -146,6 +154,7 @@ class Corte:
         self.mar = int(float((1200 + 400*RRR) / self.dh))
         self.fin_playa = int(float(400 / self.dh + self.mar))
         self.ancho_fabrica = int(float(120 / self.dh))
+        self.centro_fabrica = int(self.mar + (self.ancho_fabrica / 2))
         self.centro_cerro_1 = int(float(1200 / self.dh + self.mar))
         self.centro_depresion = int(float(1500 / self.dh + self.mar))
         self.centro_cerro_2 = int(float(2000 / self.dh + self.mar))
@@ -158,11 +167,13 @@ class Corte:
 
         self._matrix = np.zeros((self._h, self._w))
         self._elements = np.zeros((self._h, self._w))
-        # En elements se agregaran los elementos del terreno según:
+        # Se genera terreno y pobla con temperaturas correspondientes para cada cb:
         self.generate_elements()
         fill_elements(self._elements, self.alto, self.ancho, self.dh)
+        self.init_temps(self)
 
-    def init_temps(self, time):
+    def init_temps(self):
+        time = self.time
         for x in range(self.ancho):
             for y in range(self.alto):
                 if self._elements[y][x] == SEA:
@@ -201,10 +212,38 @@ class Corte:
                        self._h - 1500, self._w - 1, MOUNTAIN)
         fill_elements(self._elements, self._h, self._w, self.dh)
 
-    def reset(self):
-        self.__init__(self.dh)
+    def reset(self, time, func):
+        self.__init__(self.dh, time, func)
 
-        # Calculo donde está la linea de la montaña,
-        # luego desde allí hacia abajo declarar los valores fijos de la montaña
-        # y sus contornos. La idea es:
-        #   5. Asignar las temperaturas inicales
+    def start(self, omega, f):
+        """
+        Inicia iteraciones
+        :return:
+        """
+        for _ in tqdm.tqdm(range(1000)):
+            for x in range(1, self._w):
+                for y in range(1, self._h):  # Evitando los bordes de la matriz
+                    # Casos borde donde no calcula
+                    if self._elements[y][x] == SEA or self._elements[y][x] == FACTORY:
+                        continue
+                    elif self._elements[y][x] == MOUNTAIN or self._elements[y][x] == SNOWY_MOUNTAIN:
+                        continue
+                    # Funcion de sobre-relajación sucesiva de las diapos
+                    # solo existen condiciones de dirichlet
+                    if f != 0:
+                        # Poisson equation with f centered on factory
+                        self._matrix[y][x] += omega*.25*(self._matrix[y-1][x]+self._matrix[y+1][x]+self._matrix[y][x-1]+self._matrix[y][x+1]-4*self._matrix[y][x]-((self.dh**2)*f(x/self.dh - self.centro_fabrica, y/self.dh)))
+                    elif f == 0:
+                        # Laplace equation
+                        self._matrix[y][x] += omega*.25*(self._matrix[y-1][x]+self._matrix[y+1][x]+self._matrix[y][x-1]+self._matrix[y][x+1]-4*self._matrix[y][x])
+
+
+def main():
+    # Instancia de Corte
+    print("- - - - - - - - - - Estudio de impacto ambiental - - - - - - - - - -")
+    print("- - - - - - - - - - - - - Planta Anonima - - - - - - - - - - - - - -")
+    print("")
+    grilla = input("Tamaño de la grilla en metros:")
+    tiempo = input("Hora del día a simular:")
+    corte = Corte(grilla, tiempo, 0)
+
