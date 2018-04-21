@@ -220,6 +220,8 @@ class Corte:
         Inicia iteraciones
         :return:
         """
+        epsilon = 0.001
+        error = 0
         for _ in tqdm.tqdm(range(1000)):
             for x in range(1, self._w):
                 for y in range(1, self._h):  # Evitando los bordes de la matriz
@@ -229,6 +231,7 @@ class Corte:
                     elif self._elements[y][x] == MOUNTAIN or self._elements[y][x] == SNOWY_MOUNTAIN:
                         continue
                     # Funcion de sobre-relajación sucesiva de las diapos
+                    old = self._matrix[y][x]
                     # solo existen condiciones de dirichlet
                     if f != 0:
                         # Poisson equation with f centered on factory
@@ -236,6 +239,11 @@ class Corte:
                     elif f == 0:
                         # Laplace equation
                         self._matrix[y][x] += omega*.25*(self._matrix[y-1][x]+self._matrix[y+1][x]+self._matrix[y][x-1]+self._matrix[y][x+1]-4*self._matrix[y][x])
+                    error = max(error, abs(old - self._matrix[y][x]))
+            if error < epsilon:
+                print("Proceso detenido por error menor a "+str(epsilon)+", error igual a "+str(error))
+                print("en iteración numero "+str(_))
+                break
 
 
 def main():
