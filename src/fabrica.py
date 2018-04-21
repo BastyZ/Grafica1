@@ -71,8 +71,8 @@ def bresenham_line(matrix, x1, y1, x2, y2, value=0):
     av_i = av - dx
 
     # trazado de linea
-    while x != x2:
-        matrix[y][x] = value
+    while y != y2:
+        matrix[x][y] = value
         if av >= 0:
             # avance inclinado
             x += inc_xi
@@ -101,14 +101,14 @@ def fill_elements(matrix, alto, ancho, dh):
             cell = matrix[y][x]
             if not is_mountains:
                 if cell == SKY:
-                    break
+                    continue
                 if cell == SEA:
-                    break
+                    continue
                 if cell == FACTORY:
-                    break
+                    continue
                 if cell == MOUNTAIN:
                     is_mountains = True
-                    if y < alto - int(float(1800 / dh)):
+                    if y <= alto - int(float(1800 / dh)):
                         matrix[y][x] = SNOWY_MOUNTAIN
             else:
                 if y < alto - int(float(1800 / dh)):
@@ -154,8 +154,8 @@ class Corte:
         # Distancias relativas por grilla
         self.ancho = int(float(4000 / self.dh))
         self.alto = int(float(2000 / self.dh))
-        self._h = int(float(self.alto) / self.dh)
-        self._w = int(float(self.ancho) / self.dh)
+        self._h = int(float(self.alto))
+        self._w = int(float(self.ancho))
 
         # Distancias de elementos (metros)
         self.mar = int(float((1200 + 400*RRR) / self.dh))
@@ -176,7 +176,7 @@ class Corte:
         # Se genera terreno y pobla con temperaturas correspondientes para cada cb:
         self.generate_elements()
         fill_elements(self._elements, self.alto, self.ancho, self.dh)
-        self.init_temps(self)
+        self.init_temps()
 
     def init_temps(self):
         time = self.time
@@ -185,7 +185,7 @@ class Corte:
                 if self._elements[y][x] == SEA:
                     self._matrix[y][x] = cb_mar(time)
                 elif self._elements[y][x] == SKY:
-                    self._matrix[y][x] = cb_sky(time, y, self.dh)
+                    self._matrix[y][x] = cb_sky(time, self._h-y, self.dh)
                 elif self._elements[y][x] == FACTORY:
                     self._matrix[y][x] = temp_factory(time)
                 elif self._elements[y][x] == MOUNTAIN:
@@ -201,21 +201,21 @@ class Corte:
         # Linea del mar
         bresenham_line(self._elements, self._h-1, 0, self._h-1, self.mar, SEA)
         # Linea de fabrica
-        bresenham_line(self._elements, self._h-1, self.mar+1,
+        bresenham_line(self._elements, self._h-1, self.mar,
                        self._h-1, self.mar + self.ancho_fabrica, FACTORY)
         # Linea de playa
-        bresenham_line(self._elements, self._h-1, self.mar+self.ancho_fabrica+1,
+        bresenham_line(self._elements, self._h-1, self.mar+self.ancho_fabrica,
                        self.alto_playa, self.fin_playa, MOUNTAIN)
         # Lineas de cerro  despresion intermedia
-        bresenham_line(self._elements, self.alto_playa, self.fin_playa+1,
-                       self.centro_cerro_1, self.alto_cerro_1, MOUNTAIN)
-        bresenham_line(self._elements, self.alto_cerro_1, self.centro_cerro_1+1,
+        bresenham_line(self._elements, self.alto_playa, self.fin_playa,
+                       self.alto_cerro_1, self.centro_cerro_1, MOUNTAIN)
+        bresenham_line(self._elements, self.alto_cerro_1, self.centro_cerro_1,
                        self.alto_depresion, self.centro_depresion, MOUNTAIN)
-        bresenham_line(self._elements, self.alto_depresion, self.centro_depresion+1,
+        bresenham_line(self._elements, self.alto_depresion, self.centro_depresion,
                        self.alto_cerro_2, self.centro_cerro_2, MOUNTAIN)
         # con la última linea se decide dejarla a 1600 mts sobre el nivel del mar
         bresenham_line(self._elements, self.alto_cerro_2, self.centro_cerro_2,
-                       self._h - 1500, self._w - 1, MOUNTAIN)
+                       self._h - int(1500/self.dh), self._w, MOUNTAIN)
         fill_elements(self._elements, self._h, self._w, self.dh)
 
     def reset(self, time, func):
