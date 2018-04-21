@@ -38,13 +38,19 @@ def bresenham_line(matrix, x1, y1, x2, y2, value=0):
     """
     dy = y2 - y1
     dx = x2 - x1
-    x = x1
-    y = y1
+    x = int(x1)
+    y = int(y1)
 
     # incremento para avance inclinado
-    inc_yi = dy / abs(dy)
+    if dy == 0:
+        inc_yi = 0
+    else:
+        inc_yi = int(dy / abs(dy))
     dy = abs(dy)
-    inc_xi = dx / abs(dx)
+    if dx == 0:
+        inc_xi = 0
+    else:
+        inc_xi = int(dx / abs(dx))
     dx = abs(dx)
 
     # incremento para avance recto
@@ -66,7 +72,7 @@ def bresenham_line(matrix, x1, y1, x2, y2, value=0):
 
     # trazado de linea
     while x != x2:
-        matrix[x][y] = value
+        matrix[y][x] = value
         if av >= 0:
             # avance inclinado
             x += inc_xi
@@ -143,14 +149,15 @@ class Corte:
         """
         self.time = t
         self.function = f
+        self.dh = int(dh)
 
         # Distancias relativas por grilla
-        self.dh = dh
+        self.ancho = int(float(4000 / self.dh))
+        self.alto = int(float(2000 / self.dh))
         self._h = int(float(self.alto) / self.dh)
         self._w = int(float(self.ancho) / self.dh)
 
         # Distancias de elementos (metros)
-        self.ancho = int(float(4000 / self.dh))
         self.mar = int(float((1200 + 400*RRR) / self.dh))
         self.fin_playa = int(float(400 / self.dh + self.mar))
         self.ancho_fabrica = int(float(120 / self.dh))
@@ -159,7 +166,6 @@ class Corte:
         self.centro_depresion = int(float(1500 / self.dh + self.mar))
         self.centro_cerro_2 = int(float(2000 / self.dh + self.mar))
 
-        self.alto = int(float(2000 / self.dh))
         self.alto_playa = int(float(self._h - ((400/3) / self.dh)))
         self.alto_cerro_1 = int(float(self._h - ((1500 + 200 * RRR) / self.dh)))
         self.alto_depresion = int(float(self._h - (1300 + 200 * RRR) / self.dh))
@@ -245,13 +251,22 @@ class Corte:
                 print("en iteración numero "+str(_))
                 break
 
+    def imprime(self):
+        print(self._matrix)
+
 
 def main():
     # Instancia de Corte
+    print("")
     print("- - - - - - - - - - Estudio de impacto ambiental - - - - - - - - - -")
     print("- - - - - - - - - - - - - Planta Anonima - - - - - - - - - - - - - -")
     print("")
     grilla = input("Tamaño de la grilla en metros:")
+    print("")
     tiempo = input("Hora del día a simular:")
-    corte = Corte(grilla, tiempo, 0)
+    corte = Corte(grilla, 0, 0)
+    corte.imprime()
 
+
+if __name__ == '__main__':
+    main()
