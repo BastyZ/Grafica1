@@ -162,10 +162,19 @@ class Corte:
         self.generate_elements()
         fill_elements(self._elements, self.alto, self.ancho, self.dh)
 
-    def init_temps(self):
+    def init_temps(self, time):
         for x in range(self.ancho):
             for y in range(self.alto):
-                asas
+                if self._elements[y][x] == SEA:
+                    self._matrix[y][x] = cb_mar(time)
+                elif self._elements[y][x] == SKY:
+                    self._matrix[y][x] = cb_sky(time, y, self.dh)
+                elif self._elements[y][x] == FACTORY:
+                    self._matrix[y][x] = temp_factory(time)
+                elif self._elements[y][x] == MOUNTAIN:
+                    self._matrix[y][x] = TEMP_MOUNTAIN
+                elif self._elements[y][x] == SNOWY_MOUNTAIN:
+                    self._matrix[y][x] = TEMP_SNOW
 
     def generate_elements(self):
         """
