@@ -12,6 +12,8 @@ import numpy as np
 import math
 
 # Variable dada según enunciado
+from matplotlib.colors import LogNorm
+
 RRR = .577
 
 SKY = 0
@@ -142,13 +144,15 @@ def set_omega(n, m):
 
 
 class Corte:
-    def __init__(self, dh, t, f):
+
+    def __init__(self, dh, t):
         """"
         Constructor
         :param dh: Tamaño de la Grilla
         """
+        self.omega = 0
+        self.iteracion = 0
         self.time = t
-        self.function = f
         self.dh = int(dh)
 
         # Distancias relativas por grilla
@@ -220,14 +224,61 @@ class Corte:
     def reset(self, time, func):
         self.__init__(self.dh, time, func)
 
+    def plot(self):
+        """
+        funcion de plot basado en rio.py de Pablo Piarro
+        :fuente: https://github.com/ppizarror/CC3501-2018-1/blob/master/tareita%201/rio.py
+        :return:
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        # Se agrega grafico al plot
+        cax = ax.imshow(self._matrix, interpolation='none', norm=LogNorm(vmin=19, vmax=self._matrix.max()))
+        fig.colorbar(cax)
+        plt.title("t = "+str(self.time)+", dh = "+str(self.dh)+", it = "+str(self.iteracion)+", w = "+str(self.omega))
+        plt.show()
+
+    def plot_ambient(self):
+        """
+        funcion de plot basado en rio.py de Pablo Piarro
+        :fuente: https://github.com/ppizarror/CC3501-2018-1/blob/master/tareita%201/rio.py
+        :return:
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        # Se agrega grafico al plot
+        cax = ax.imshow(self._matrix, interpolation='none', norm=LogNorm(vmin=0.1, vmax=30))
+        fig.colorbar(cax)
+        plt.title("t = "+str(self.time)+", dh = "+str(self.dh)+", it = "+str(self.iteracion))
+        plt.show()
+
+    def plot_elements(self):
+        """
+        funcion de plot basado en rio.py de Pablo Piarro
+        :fuente: https://github.com/ppizarror/CC3501-2018-1/blob/master/tareita%201/rio.py
+        :return:
+        """
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+
+        # Se agrega grafico al plot
+        cax = ax.imshow(self._elements, interpolation='none')
+        fig.colorbar(cax)
+        plt.title("t = "+str(self.time)+", dh = "+str(self.dh)+", it = "+str(self.iteracion))
+        plt.show()
+
     def start(self, omega, f):
         """
         Inicia iteraciones
         :return:
         """
-        epsilon = 0.001
+        self.omega = omega
+        epsilon = 15
         error = 0
         for _ in tqdm.tqdm(range(1000)):
+            error = 0
             for x in range(1, self._w-1):
                 for y in range(1, self._h-1):  # Evitando los bordes de la matriz
                     # Casos borde donde no calcula
@@ -246,9 +297,11 @@ class Corte:
                         self._matrix[y][x] += omega*.25*(self._matrix[y-1][x]+self._matrix[y+1][x]+self._matrix[y][x-1]+self._matrix[y][x+1]-4*self._matrix[y][x])
                     error = max(error, abs(old - self._matrix[y][x]))
             if error < epsilon:
+                self.iteracion = _
                 print("Proceso detenido por error menor a "+str(epsilon)+", error igual a "+str(error))
                 print("en iteración numero "+str(_))
                 break
+        print("Error: "+str(error))
 
     def imprime(self):
         print(self._matrix)
@@ -256,18 +309,26 @@ class Corte:
 
 def main():
     # Instancia de Corte
+    print("- - - - - - - - - - Estudio de impacto ambiental - - - - - - - - - -\n"
+          "- - - - - - - - - - - - - Planta Anonima - - - - - - - - - - - - - -")
+    # Se deja esta función con varias partes comentadas para correr
+    # distintos experimentos con el modelo
     print("")
-    print("- - - - - - - - - - Estudio de impacto ambiental - - - - - - - - - -")
-    print("- - - - - - - - - - - - - Planta Anonima - - - - - - - - - - - - - -")
-    print("")
-    grilla = input("Tamaño de la grilla en metros:")
-    print("")
-    tiempo = input("Hora del día a simular:")
-    corte = Corte(grilla, 0, 0)
-    corte.imprime()
-    corte.start(set_omega(2000,4000), 0)
-    corte.imprime()
 
+    # Inputs
+    #omega = input("ingrese omega")
+    grilla, tiempo = input("Tamaño grilla y hora separado por espacio").split(" ")
+    #grilla, tiempo = 10, 0
 
+    # Opciones de instancias:
+    corte = Corte(int(grilla), int(tiempo))
+    #Para usar el rho del enunciado escribir 'rho',
+    # para usar laplaciano escribir '0'
+    #corte.start(float(omega), 0)
+    corte.start(set_omega(2000, 4000), 0)
+    corte.plot()
+
+# No se que hace esto, pero todos lo tenían
+# Solo quería ser popular
 if __name__ == '__main__':
     main()
